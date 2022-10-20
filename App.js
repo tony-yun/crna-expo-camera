@@ -13,6 +13,7 @@ export default function App() {
   //  camera permissions
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
   const [camera, setCamera] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
 
   // Screen Ratio and image padding
   const [imagePadding, setImagePadding] = useState(0);
@@ -93,7 +94,13 @@ export default function App() {
             setCamera(ref);
           }}
         ></Camera>
-        <TouchableOpacity style={styles.recordButton} />
+        {isRecording ? (
+          <TouchableOpacity style={styles.recordingButton} />
+        ) : (
+          <TouchableOpacity style={styles.recordingButton}>
+            <View style={styles.redSquare} />
+          </TouchableOpacity>
+        )}
       </View>
     );
   }
@@ -114,7 +121,7 @@ const styles = StyleSheet.create({
   cameraPreview: {
     flex: 1,
   },
-  recordButton: {
+  recordingButton: {
     width: 70,
     height: 70,
     borderWidth: 8,
@@ -126,5 +133,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     margin: 10,
+  },
+  redSquare: {
+    width: 30,
+    height: 30,
+    backgroundColor: "#FF0000",
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
