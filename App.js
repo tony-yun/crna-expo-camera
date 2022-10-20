@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Text, Dimensions, Platform } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Dimensions,
+  Platform,
+  TouchableOpacity,
+} from "react-native";
 import { Camera } from "expo-camera";
 
 export default function App() {
@@ -14,7 +21,6 @@ export default function App() {
   const screenRatio = height / width;
   const [isRatioSet, setIsRatioSet] = useState(false);
 
-  // on screen  load, ask for permission to use the camera
   useEffect(() => {
     async function getCameraStatus() {
       const { status } = await Camera.requestCameraPermissionsAsync();
@@ -23,17 +29,11 @@ export default function App() {
     getCameraStatus();
   }, []);
 
-  // set the camera ratio and padding.
-  // this code assumes a portrait mode screen
   const prepareRatio = async () => {
-    let desiredRatio = "4:3"; // Start with the system default
-    // This issue only affects Android
+    let desiredRatio = "4:3";
     if (Platform.OS === "android") {
       const ratios = await camera.getSupportedRatiosAsync();
 
-      // Calculate the width/height of each of the supported camera ratios
-      // These width/height are measured in landscape mode
-      // find the ratio that is closest to the screen ratio without going over
       let distances = {};
       let realRatios = {};
       let minDistance = null;
@@ -41,7 +41,6 @@ export default function App() {
         const parts = ratio.split(":");
         const realRatio = parseInt(parts[0]) / parseInt(parts[1]);
         realRatios[ratio] = realRatio;
-        // ratio can't be taller than screen, so we don't want an abs()
         const distance = screenRatio - realRatio;
         distances[ratio] = realRatio;
         if (minDistance == null) {
@@ -52,22 +51,16 @@ export default function App() {
           }
         }
       }
-      // set the best match
       desiredRatio = minDistance;
-      //  calculate the difference between the camera width and the screen height
       const remainder = Math.floor(
         (height - realRatios[desiredRatio] * width) / 2
       );
-      // set the preview padding and preview ratio
       setImagePadding(remainder);
       setRatio(desiredRatio);
-      // Set a flag so we don't do this
-      // calculation each time the screen refreshes
       setIsRatioSet(true);
     }
   };
 
-  // the camera must be loaded in order to access the supported ratios
   const setCameraReady = async () => {
     if (!isRatioSet) {
       await prepareRatio();
@@ -89,11 +82,6 @@ export default function App() {
   } else {
     return (
       <View style={styles.container}>
-        {/* 
-        We created a Camera height by adding margins to the top and bottom, 
-        but we could set the width/height instead 
-        since we know the screen dimensions
-        */}
         <Camera
           style={[
             styles.cameraPreview,
@@ -105,6 +93,7 @@ export default function App() {
             setCamera(ref);
           }}
         ></Camera>
+        <TouchableOpacity style={styles.recordButton} />
       </View>
     );
   }
@@ -124,5 +113,18 @@ const styles = StyleSheet.create({
   },
   cameraPreview: {
     flex: 1,
+  },
+  recordButton: {
+    width: 70,
+    height: 70,
+    borderWidth: 8,
+    borderRadius: 50,
+    borderColor: "#ffffff",
+    position: "absolute",
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: 10,
   },
 });
